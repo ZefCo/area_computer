@@ -8,30 +8,31 @@ fn main() {
     let pi_diff = pi_target*0.0001;
     let pi_max = pi_target + pi_diff;
     let pi_min = pi_target - pi_diff;
-    let mut hits: i64 = 0;
-    let mut total: i64 = 0;
-    let mut prob: i64 = 0;
-    let steps = 100;
+    let mut hits: f64 = 0.0;
+    let mut total: f64 = 0.0;
+    // let prob: i64;
+    let steps = 1000;
     println!("We want to find Pi = {0} between {1} and {2}", pi_target, pi_max, pi_min);
     println!("How many steps does this require?");
     // random_number()
-    let v = point();
     // println!("The values generated are {0}, {1}, {2}, {3}", v[0], v[1], v[2], v[3]);
     // let prob = inside_outside(total, hits, v[2], v[3]);
     // println!("The value for pi is {0} with {1} hits after {2} shots", prob, hits, total)
-    for _ in 0..steps {
-        if v[2] <= 1.0 && v[3] >= -1.0 {
-            hits += 1;
-            total += 1;
+    for _ in 1..=steps {
+        // if v[2] <= 1.0 && v[3] >= -1.0 {
+        let v = point();
+        if v[2] <= 0.5 {
+            hits += 1.0;
+            total += 1.0;
         } else {
-            total += 1;
+            total += 1.0;
         }
-        prob = hits / total;
+        // prob = hits / total;
         // println!("{}", prob)
     }
-    let new_pi = 4 * prob;
-    // println!("After {0} steps the value of pi is {1}", steps, new_pi)
-    println!("{0}, {1}", total, hits)
+    let new_pi = 4.0 * hits/total;
+    println!("After {0} steps the value of pi is {1}", steps, &new_pi);
+    // println!("total attempts = {0}, total hits = {1}", total, hits)
 }
 
 fn random_number() -> f64 {
@@ -46,15 +47,17 @@ fn point() -> Vec<f64> {
     // println!("Generated two random numbers: {0} and {1}", x, y)
     let mut vector_return = Vec::with_capacity(4);
 
-    let x = rand::thread_rng().gen_range(-1.0..1.000000000000001);
-    let y = rand::thread_rng().gen_range(-1.0..1.000000000000001);
-    let upper = |x: f64, y: f64| -> f64{x.powf(2.0) + y.powf(2.0)};
-    let lower = |x: f64, y: f64| -> f64{-(x.powf(2.0) + y.powf(2.0))};
+    let x = rand::thread_rng().gen_range(-0.5..0.500000000000001);
+    let y = rand::thread_rng().gen_range(-0.5..0.500000000000001);
+    let upper = |x: f64, y: f64| -> f64{(x.powf(2.0) + y.powf(2.0)).sqrt()};
+    // let lower = |x: f64, y: f64| -> f64{-(x.powf(2.0) + y.powf(2.0)).sqrt()};
 
     vector_return.push(x);
     vector_return.push(y);
     vector_return.push(upper(x, y));
-    vector_return.push(lower(x, y));
+    // vector_return.push(lower(x, y));
+
+    // println!("x = {0}, y = {1}, r = {2}", vector_return[0], vector_return[1], vector_return[2]);
 
     return vector_return
 
