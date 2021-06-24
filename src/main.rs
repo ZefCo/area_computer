@@ -23,7 +23,7 @@ fn main() {
 
         println!("{}", i);
 
-        let r:(i32, f64, f64) = looper(di_target, pi_target);
+        let r:(i64, f64, f64) = looper(di_target, pi_target);
         
         // steps.push(r.0);
         // pi_coll.push(r.1);
@@ -54,12 +54,12 @@ fn point() -> Vec<f64> {
 
 }
 
-fn looper(dt: f64, pt: f64) -> (i32, f64, f64) {
+fn looper(dt: f64, pt: f64) -> (i64, f64, f64) {
 
     let diff_target: f64 = dt;
     let pi_target: f64 = pt;
 
-    let mut steps: i32 = 0;
+    let mut steps: i64 = 0;
 
     let new_pi = |i: f64, o: f64| -> f64 {4.0 * (i / o)};
 
@@ -92,7 +92,7 @@ fn looper(dt: f64, pt: f64) -> (i32, f64, f64) {
         }
     }
 
-    let r: (i32, f64, f64) = (steps, new_pi(hits, total), pd(new_pi(hits, total), pi_target));
+    let r: (i64, f64, f64) = (steps, new_pi(hits, total), pd(new_pi(hits, total), pi_target));
 
     return r
 
