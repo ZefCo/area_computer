@@ -1,4 +1,9 @@
+
 // use std::array;
+use std::time::{Duration, Instant};
+use plotters::prelude::*;
+
+// use std::time::Instant;
 
 use core::f64;
 
@@ -8,10 +13,12 @@ fn main() {
 
     // let attempts: i32 = 10;
     let attempts: i32 = 5;
+    // let attempts: i32 = 0;
 
-    // let mut steps: Vec<i32> = Vec::new();
-    // let mut pi_coll: Vec<f64> = Vec::new();
-    // let mut pi_pd: Vec<f64> = Vec::new();
+    let mut steps: Vec<i64> = Vec::new();
+    let mut pi_cal: Vec<f64> = Vec::new();
+    let mut pi_pd: Vec<f64> = Vec::new();
+    let mut time_taken: Vec<Duration> = Vec::new();
 
     // let pi_target: f64 = 3.141592653589793;
     // let di_target: f64 = 0.0000000000000001;
@@ -21,21 +28,30 @@ fn main() {
 
     for i in 0..=attempts {
 
+        let startwatch: Instant = Instant::now();
+
         println!("{}", i);
 
         let r:(i64, f64, f64) = looper(di_target, pi_target);
+
+        let stopwatch: Duration = startwatch.elapsed();
         
-        // steps.push(r.0);
-        // pi_coll.push(r.1);
-        // pi_pd.push(r.2);
+        steps.push(r.0);
+        pi_cal.push(r.1);
+        pi_pd.push(r.2);
+        time_taken.push(stopwatch);
 
         println!("After {0} steps pi has been calculated to {1} with a % diff = {2}", r.0, r.1, r.2);
+        println!("Took {:?} seconds to finish", stopwatch)
     
     }
 
+    // let steps_figure = 
+
+    // println!("Elsapsed time ")
     // println!("After {0} attemps we have steps = {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10},", attempts, steps[0], steps[1], steps[2], steps[3], steps[4], steps[5], steps[6], steps[7], steps[8], steps[9])
     // println!("After {0} steps pi has been calculated to {1} with a % diff = {2}", steps[0], pi_coll[0], pi_pd[0])
-
+    
 }
 
 fn point() -> Vec<f64> {
@@ -80,14 +96,16 @@ fn looper(dt: f64, pt: f64) -> (i64, f64, f64) {
 
         total += 1.0;
         
-        if diff(new_pi(hits, total), pi_target) < diff_target {
-            break;
-        } else {
-            steps += 1
-        }
+        // if diff(new_pi(hits, total), pi_target) < diff_target {
+        //     break;
+        // } else {
+        //     steps += 1
+        // }
 
-        if steps > 1000000000 {
-            println!("Hit too many steps {0}, pi={1}", steps, new_pi(hits, total));
+        steps += 1;
+
+        if steps > 100 {
+            // println!("Hit too many steps {0}, pi={1}", steps, new_pi(hits, total));
             break;
         }
     }
