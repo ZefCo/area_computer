@@ -23,3 +23,15 @@ Also trying to figure out how to get this to complie on Linux. Probably going to
 Other things to note:
 
 1) how do floats work? Should we be using straight binary instead of a float? How about instead of a float we start over but use an "integrer" value of pi (so multiply the whole thing by 100 or 10000 or something, do the work that way, then shrink it down to a float.)?
+
+How I'm going to do this:
+
+hold pi as a vector, compute it with the vector, then compare to the original value.
+
+This should be on a new branch we'll call VECTOR
+
+#### 6/28/21:
+
+Created vector branch and currently working on that.
+
+How to handle pi? I want to compare this digit to digit, so what do I do?
