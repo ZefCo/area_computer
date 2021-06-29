@@ -1,25 +1,34 @@
 
 // use std::array;
-use std::time::{Duration, Instant};
-use plotters::prelude::*;
+// use std::{iter, time::{Duration, Instant}};
+// use plotters::prelude::*;
 
 // use std::time::Instant;
 
 use core::f64;
-
+// use std::iter::empty;
+// use std::cmp::max;
 use rand::Rng;
 
 fn main() {
-    
-    let digits_of_interest: usize = 5;
 
+    // let iters = 100_000;
+    let iters = 10;
+
+    let digits_of_interest: usize = 3;
+
+    // let mut x_vec = Vec::new();
+    // let mut y_vec = Vec::new();
+    // let mut r_vec = Vec::new();
+    
     let pi_data: (Vec<usize>, usize, usize) = start(digits_of_interest);
 
-    // let output = point(pi_data.2 as isize);
+    println!("decimal places = {}", pi_data.2);
 
-    // println!("x={0}, y={1}", output.0, output.1)
+    let pi_final = looper(pi_data.2 as isize, digits_of_interest, pi_data.0, iters);
 
-    let rxy = point(pi_data.2 as isize);
+    println!("Pi ~ {}", pi_final)
+
 }
 
 struct Digits {
@@ -95,95 +104,135 @@ fn start(input_digits: usize) -> (Vec<usize>, usize, usize) {
         return (pi_vect, pi_tar, decimal)
 }
 
-fn looper() {
-    
-}
-
-// fn iterator(max_it: u32, di_target: f64, pi_target: f64) {
-    
-//     let mut steps: Vec<i64> = Vec::new();
-//     let mut pi_cal: Vec<f64> = Vec::new();
-//     let mut pi_pd: Vec<f64> = Vec::new();
-//     let mut time_taken: Vec<Duration> = Vec::new();
-
-//     for i in 0..=max_it {
-//         let startwatch: Instant = Instant::now();
-
-//         println!("{}", i);
-
-//         let r:(i64, f64, f64) = looper(di_target, pi_target);
-
-//         let stopwatch: Duration = startwatch.elapsed();
-        
-//         steps.push(r.0);
-//         pi_cal.push(r.1);
-//         pi_pd.push(r.2);
-//         time_taken.push(stopwatch);
-
-//         println!("After {0} steps pi has been calculated to {1} with a % diff = {2}", r.0, r.1, r.2);
-//         println!("Took {:?} seconds to finish", stopwatch)
-
-//     }
-// }
-
-fn point(decimal_size: isize) -> (usize, f64, f64) {
+fn point(decimal_size: isize) -> (f64, f64) {
 
     let x_ran = rand::thread_rng().gen_range(-decimal_size..decimal_size) as f64;
     let y_ran = rand::thread_rng().gen_range(-decimal_size..decimal_size) as f64;
 
     let x = x_ran / (decimal_size as f64);
     let y = y_ran / (decimal_size as f64);
-    
-    let r = ((x.powf(2.0)+ y.powf(2.0)).sqrt() * decimal_size as f64) as usize;
 
-    // println!("x={0}, y={1}, r={2}", x, y, r)
-
-    return (r, x, y)
+    return (x, y)
 
 }
 
-// fn looper(dt: f64, pt: f64) -> (i64, f64, f64) {
+fn circuitbreaker(mut circuit: Vec<bool>, length: usize) -> Vec<bool> {
+    for index in 0..=length {
+        circuit[index] = false;
+    }
 
-//     let diff_target: f64 = dt;
-//     let pi_target: f64 = pt;
+    return circuit
+}
 
-//     let mut steps: i64 = 0;
+fn too_many_steps(steps: usize, max_steps: usize) -> bool {
+    if steps > max_steps {
+        println!("ending script, steps = {}, max steps = {}", steps, max_steps);
+        return true
+    } else {
+        false
+    }
+}
 
-//     let new_pi = |i: f64, o: f64| -> f64 {4.0 * (i / o)};
+fn looper(decimal_size: isize, digits_of_interest: usize, pi_target: Vec<usize>, max_steps: usize) -> f64 {
 
-//     let pd = |m: f64, t: f64| -> f64 {((m - t).abs() / (0.5 * (m + t))) * 100.0};
+    let mut inside: f64 = 0.0;
+    let mut total: f64 = 0.0;
 
-//     let diff = |m: f64, t: f64| -> f64 {(m - t).abs()};
+    let radius =|x: f64, y: f64| -> f64 {(x.powf(2.0) + y.powf(2.0)).sqrt()};
+    let pi_approx = |i: f64, t: f64| -> f64 {4.0 * (i / t)};
 
-//     let mut hits: f64 = 0.0;
+    // let mut pi_bool = Vec::new();
+    let mut pi_bool = empty_vec(digits_of_interest);
+    let pi_val: f64;
+
+    loop {
+        let (x,y) = point(decimal_size as isize);
+        // x_vec.push(x);
+        // y_vec.push(y);
+    
+        let r = radius(x, y);
+        // let r_size = (r * pi_data.2 as f64) as usize;
+    
+        if r <= 1.0 {
+            inside += 1.0;
+        }
+    
+        total += 1.0;
+
+        // let pi_nodec = (pi_approx(inside, total) * (decimal_size / 10) as f64) as usize;
+        let pi_nodec = (pi_approx(inside, total) * decimal_size as f64) as usize;
+
+
+        let pinew_digits: Vec<_> = Digits::new(pi_nodec).collect();
+        
+        // r_vec.push(radius(x, y, pi_data.2));
+
+// the code can fail right away if the lengths don't match, which happens if the first point is out of bounds. If pinew_digits is less then
+// the length of pi_target this should pass, simply becaues there is no way they will be the same. It also gets around the possiblity of a
+// failure due to the length of the vectors.
+        println!("#### Starting comparison ####");
+        for (index, _) in pi_target.iter().enumerate() {
+            println!("{0}, {1}", pi_target[index], pinew_digits[index]);
+            if pi_target[index] == pinew_digits[index] {
+                pi_bool[index] = true;
+            }
+        }
+
+        if pi_bool.iter().all(|&x| x==true) {
+            println!("Found a match after steps={}", total);
+            // println!("{:?}", pi_bool);
+            pi_val = pi_approx(inside, total);
+            // return pi_val
+            break pi_val
+        } else {
+            pi_bool = circuitbreaker(pi_bool, digits_of_interest)
+        }
+
+        if too_many_steps(total as usize, max_steps) {
+            pi_val = pi_approx(inside, total);
+            println!("{:?}", pi_nodec);
+            println!("{:?}", pi_bool);
+            break pi_val
+            // return pi_val
+        }
+
+    }
+}
+
+fn empty_vec(length: usize) -> Vec<bool> {
+    let mut output_vec = Vec::new();
+    for _ in 0..=length {
+        output_vec.push(false);
+    }
+
+    return output_vec
+}
+
+// fn def_loop(decimal_size: isize, max_steps: usize) {
+//     // let mut steps: usize;
+//     let mut inside: f64 = 0.0;
 //     let mut total: f64 = 0.0;
 
-//     loop {
+//     let radius =|x: f64, y: f64| -> f64 {(x.powf(2.0) + y.powf(2.0)).sqrt()};
 
-//         let v: Vec<f64> = point();
-        
-//         if v[2] <= 0.5 {
-//             hits += 1.0;
+//     for _ in 0..=max_steps{
+//         let (x,y) = point(decimal_size);
+//         // x_vec.push(x);
+//         // y_vec.push(y);
+    
+//         let r = radius(x, y);
+//         // let r_size = (r * pi_data.2 as f64) as usize;
+    
+//         if r <= 1.0 {
+//             // println!("hit!");
+//             inside += 1.0;
 //         }
-
+    
 //         total += 1.0;
-        
-//         // if diff(new_pi(hits, total), pi_target) < diff_target {
-//         //     break;
-//         // } else {
-//         //     steps += 1
-//         // }
-
-//         steps += 1;
-
-//         if steps > 100 {
-//             // println!("Hit too many steps {0}, pi={1}", steps, new_pi(hits, total));
-//             break;
-//         }
+    
+//         // r_vec.push(radius(x, y, pi_data.2));
 //     }
 
-//     let r: (i64, f64, f64) = (steps, new_pi(hits, total), pd(new_pi(hits, total), pi_target));
-
-//     return r
+//     println!("Pi ~ {}", 3.14)
 
 // }

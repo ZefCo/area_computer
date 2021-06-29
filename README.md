@@ -39,3 +39,7 @@ How to handle pi? I want to compare this digit to digit, so what do I do?
 The main trouble I'm having is that, to find a point inside/outside the circle I am using the equation x^2 + y^2 = r^2, and in Rust this requires a floating point number, which will either reduce accuracy or result in an overflow error. So how to do this without using floating points? Or is it that big of a deal? Could I use floating points just for this part? Just use floating points and then multiply them to get them into an int form?
 
 Seems like the nubmers are going to be way to big. Solution: have to use a floating point to generate the random number, but I'll have to format them to fit within a certain area: don't need the extra accuracy if we're not looking for it.
+
+#### 6/29/21
+
+Need to work on line 173: there's an error due to the size of two vectors that can crash the script before it starts.
