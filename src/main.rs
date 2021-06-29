@@ -13,8 +13,13 @@ fn main() {
     
     let digits_of_interest: usize = 5;
 
-    let pi_data: (usize, usize) = start(digits_of_interest);
+    let pi_data: (Vec<usize>, usize, usize) = start(digits_of_interest);
 
+    // let output = point(pi_data.2 as isize);
+
+    // println!("x={0}, y={1}", output.0, output.1)
+
+    let rxy = point(pi_data.2 as isize);
 }
 
 struct Digits {
@@ -28,7 +33,6 @@ impl Digits {
         while n >= divisor * 10 {
             divisor *= 10;
         }
-
         Digits {
             n: n,
             divisor: divisor,
@@ -52,24 +56,33 @@ impl  Iterator for Digits {
     
 }
 
-fn start(input_digits: usize) -> (usize, usize) {
-        // let pi_target: f64 = 3.141592653589793;
+fn start(input_digits: usize) -> (Vec<usize>, usize, usize) {
+        let pi_engineering: f64 = 3.141592653589793;
 
         let pi_abs: usize = 3141592653589793;
 
         let piabs_digits: Vec<_> = Digits::new(pi_abs).collect();
     
-        let digitsofint: usize = input_digits;
-        let mut pi_vect = Vec::new();
-    
+        // let digitsofint: usize = input_digits;
+        let digitsofint: usize;
+        let mut pi_vect: Vec<usize> = Vec::new();    
         let mut zeros: usize = 1;
+        let mut pi_tar: usize = 0;
+
+        if input_digits > 15 {
+            digitsofint = 15;
+            println!("Truncating to {}, can only work with pi up to 15 decimal places, sorry.", pi_engineering)
+        } else {
+            digitsofint = input_digits
+        }
+
         for index in 0..=digitsofint {
             pi_vect.push(piabs_digits[index]);
             zeros *= 10;
         }
     
         let decimal = zeros;
-        let mut pi_tar: usize = 0;
+
         for index in 0..pi_vect.len() {
             pi_tar = pi_tar + (pi_vect[index] * zeros);
             zeros /= 10;
@@ -77,9 +90,13 @@ fn start(input_digits: usize) -> (usize, usize) {
     
         // let pi_tar: usize = pi_vect.iter().sum();
         println!("{}", pi_tar);
-        println!("{}", pi_tar / (decimal / 100));
+        // println!("{}", pi_tar / (decimal / 100));
         
-        return (pi_tar, decimal)
+        return (pi_vect, pi_tar, decimal)
+}
+
+fn looper() {
+    
 }
 
 // fn iterator(max_it: u32, di_target: f64, pi_target: f64) {
@@ -109,21 +126,21 @@ fn start(input_digits: usize) -> (usize, usize) {
 //     }
 // }
 
-// fn point() -> Vec<f64> {
+fn point(decimal_size: isize) -> (usize, f64, f64) {
 
-//     let mut vector_return: Vec<f64> = Vec::with_capacity(4);
+    let x_ran = rand::thread_rng().gen_range(-decimal_size..decimal_size) as f64;
+    let y_ran = rand::thread_rng().gen_range(-decimal_size..decimal_size) as f64;
 
-//     let x: f64 = rand::thread_rng().gen_range(-0.5..0.500000000000001);
-//     let y: f64 = rand::thread_rng().gen_range(-0.5..0.500000000000001);
-//     let upper = |x: f64, y: f64| -> f64{(x.powf(2.0) + y.powf(2.0)).sqrt()};
+    let x = x_ran / (decimal_size as f64);
+    let y = y_ran / (decimal_size as f64);
+    
+    let r = ((x.powf(2.0)+ y.powf(2.0)).sqrt() * decimal_size as f64) as usize;
 
-//     vector_return.push(x);
-//     vector_return.push(y);
-//     vector_return.push(upper(x, y));
+    // println!("x={0}, y={1}, r={2}", x, y, r)
 
-//     return vector_return
+    return (r, x, y)
 
-// }
+}
 
 // fn looper(dt: f64, pt: f64) -> (i64, f64, f64) {
 
