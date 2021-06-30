@@ -43,3 +43,9 @@ Seems like the nubmers are going to be way to big. Solution: have to use a float
 #### 6/29/21
 
 Need to work on line 173: there's an error due to the size of two vectors that can crash the script before it starts.
+
+#### 6/30/21
+
+Solved the error: just made it into an if statement that checks the length. If the length of the new digits is shorter then the digits of interest it just passes and moves on - no points in looking into that.
+
+Now to move onto outputting into a graph and collecting data.

@@ -12,22 +12,38 @@ use rand::Rng;
 
 fn main() {
 
-    // let iters = 100_000;
-    let iters = 10;
+    let iters = 100_000;
+    // let iters = 100;
+    let dos = 100;
 
-    let digits_of_interest: usize = 3;
+    let digits_of_interest: usize = 5;
 
     // let mut x_vec = Vec::new();
     // let mut y_vec = Vec::new();
     // let mut r_vec = Vec::new();
+
+    let mut pi_vec = Vec::new();
+    let mut steps_vec = Vec::new();
     
     let pi_data: (Vec<usize>, usize, usize) = start(digits_of_interest);
 
     println!("decimal places = {}", pi_data.2);
 
-    let pi_final = looper(pi_data.2 as isize, digits_of_interest, pi_data.0, iters);
+    // let pi_final = looper(pi_data.1, pi_data.2 as isize, digits_of_interest, pi_data.0, iters);
 
-    println!("Pi ~ {}", pi_final)
+    // println!("Pi ~ {}", pi_final.0)
+
+    for _ in 0..=dos {
+        let pi_output = looper(pi_data.1, pi_data.2 as isize, digits_of_interest, pi_data.0.to_owned(), iters);
+
+        pi_vec.push(pi_output.0);
+        steps_vec.push(pi_output.2);
+
+    }
+
+    for (index, value) in pi_vec.iter().enumerate() {
+        println!("Pi ~ {0}, Steps = {1}", value, steps_vec[index])
+    }
 
 }
 
@@ -133,7 +149,18 @@ fn too_many_steps(steps: usize, max_steps: usize) -> bool {
     }
 }
 
-fn looper(decimal_size: isize, digits_of_interest: usize, pi_target: Vec<usize>, max_steps: usize) -> f64 {
+fn percent_errdiff(theoretical: f64, measured: f64) -> (f64, f64) {
+    let diff = (theoretical - measured) / (0.5 * (theoretical + measured));
+    let err = (theoretical - measured) / theoretical;
+
+    return (diff, err)
+}
+
+fn looper(pi_target: usize, decimal_size: isize, digits_of_interest: usize, pi_digits: Vec<usize>, max_steps: usize) -> (f64, f64, f64) {
+
+    let pi_tar = pi_target as f64 / decimal_size as f64;
+
+    // println!("Looking for pi = {}", pi_tar);
 
     let mut inside: f64 = 0.0;
     let mut total: f64 = 0.0;
@@ -162,38 +189,39 @@ fn looper(decimal_size: isize, digits_of_interest: usize, pi_target: Vec<usize>,
         // let pi_nodec = (pi_approx(inside, total) * (decimal_size / 10) as f64) as usize;
         let pi_nodec = (pi_approx(inside, total) * decimal_size as f64) as usize;
 
-
         let pinew_digits: Vec<_> = Digits::new(pi_nodec).collect();
         
         // r_vec.push(radius(x, y, pi_data.2));
 
-// the code can fail right away if the lengths don't match, which happens if the first point is out of bounds. If pinew_digits is less then
-// the length of pi_target this should pass, simply becaues there is no way they will be the same. It also gets around the possiblity of a
-// failure due to the length of the vectors.
-        println!("#### Starting comparison ####");
-        for (index, _) in pi_target.iter().enumerate() {
-            println!("{0}, {1}", pi_target[index], pinew_digits[index]);
-            if pi_target[index] == pinew_digits[index] {
-                pi_bool[index] = true;
+        // println!("#### Starting comparison ####");
+        for (index, _) in pi_digits.iter().enumerate() {
+            // println!("{0}, {1}", pi_target[index], pinew_digits[index]);
+            if pinew_digits.len() >= pi_digits.len() {
+                if pi_digits[index] == pinew_digits[index] {
+                    pi_bool[index] = true;
+                }    
+            // } else {
+            //     println!("pinew_digits is to small")
             }
         }
 
         if pi_bool.iter().all(|&x| x==true) {
-            println!("Found a match after steps={}", total);
-            // println!("{:?}", pi_bool);
             pi_val = pi_approx(inside, total);
-            // return pi_val
-            break pi_val
+
+            let per_errdiff = percent_errdiff(pi_tar, pi_val as f64);
+            // println!("Found PI to be {}", pi_val);
+            break (pi_val, per_errdiff.1, total)
         } else {
             pi_bool = circuitbreaker(pi_bool, digits_of_interest)
         }
 
         if too_many_steps(total as usize, max_steps) {
             pi_val = pi_approx(inside, total);
-            println!("{:?}", pi_nodec);
-            println!("{:?}", pi_bool);
-            break pi_val
-            // return pi_val
+            // println!("{:?}", pi_nodec);
+            // println!("{:?}", pi_bool);
+            let per_errdiff = percent_errdiff(pi_tar, pi_val as f64);
+            break (pi_val, per_errdiff.1, total)
+            // break pi_val
         }
 
     }
